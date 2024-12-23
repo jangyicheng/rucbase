@@ -30,6 +30,7 @@ class BufferPoolManagerTest : public ::testing::Test {
         if (disk_manager_->is_dir(TEST_DB_NAME)) {
             disk_manager_->destroy_dir(TEST_DB_NAME);
         }
+        
         // 创建一个新的目录
         disk_manager_->create_dir(TEST_DB_NAME);
         assert(disk_manager_->is_dir(TEST_DB_NAME));  // 检查是否创建目录成功
@@ -88,14 +89,16 @@ TEST_F(BufferPoolManagerTest, SimpleTest) {
     // create and open file
     disk_manager_->create_file(filename);
     int fd = disk_manager_->open_file(filename);
+
     // create tmp PageId
     PageId tmp_page_id = {.fd = fd, .page_no = INVALID_PAGE_ID};
+
     auto *page0 = bpm->new_page(&tmp_page_id);
 
     // Scenario: The buffer pool is empty. We should be able to create a new page.
     ASSERT_NE(nullptr, page0);
     EXPECT_EQ(0, tmp_page_id.page_no);
-
+    
     // Scenario: Once we have a page, we should be able to read and write content.
     snprintf(page0->get_data(), sizeof(page0->get_data()), "Hello");
     EXPECT_EQ(0, strcmp(page0->get_data(), "Hello"));
